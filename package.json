@@ -1,0 +1,25 @@
+{
+  "name": "thehelp-log-shim",
+  "version": "0.1.0",
+  "main": "src/server/index.js",
+  "devDependencies": {
+    "async": "^0.9.0",
+    "blanket": "1.1.6",
+    "grunt": "0.4.5",
+    "mkdirp": "^0.5.0",
+    "rimraf": "^2.2.8",
+    "thehelp-project": "3.3.1",
+    "thehelp-test": "3.2.0"
+  },
+  "config": {
+    "blanket": {
+      "data-cover-only": "src",
+      "data-cover-never": "['lib/','node_modules/','test/','src/client']"
+    }
+  },
+  "author": "Scott Nonnenberg",
+  "repository": {
+    "type": "git",
+    "url": "git@infra:thehelp-log-shim"
+  }
+}
