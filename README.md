@@ -120,6 +120,13 @@ versions.forEach(function(version) {
 Of course, this is a bit dangerous as it doesn't take into account the differences of all the various versions. But it will get you started.
 
 
+## A note to library writers
+
+Always include some sort of post-`require()` configuration option!
+
+You'll remove your users' ability to do more complex customization of `thehelp-log-shim` if you load everything up on initial `require()` of your library. In that case, you'll load up your version of `thehelp-log-shim`, get your `logger` object, then move on before your users have a chance to inject themselves.
+
+
 ## Detailed Documentation
 
 Detailed docs be found at this project's GitHub Pages, thanks to [`groc`](https://github.com/nevir/groc): <http://thehelp.github.io/log-shim/src/server/log_shim.html>
