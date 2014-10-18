@@ -67,11 +67,12 @@ exports.cleanupScenario = function(name, cb) {
 
 // Start a forked node.js process, both capturing stdout/stderr and piping
 // them to this process's stdout/stderr.
-exports.startProcess = function(module) {
-  var child = fork(module, {
-    silent: true,
-    stdio: 'pipe'
-  });
+exports.startProcess = function(module, options) {
+  options = options || {};
+  options.silent = true;
+  options.stdio = 'pipe';
+
+  var child = fork(module, options);
 
   if (child.stdout) {
     child.stdoutResult = '';
