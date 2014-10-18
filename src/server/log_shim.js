@@ -68,7 +68,7 @@ var pkg = require(path.join(__dirname + '/../../package.json'));
 shim._version = pkg.version;
 
 var registry = global[pkg.name] = global[pkg.name] || {};
-var version = global[pkg.name][pkg.version] = [];
+var version = registry[pkg.version] = registry[pkg.version] || [];
 
 version.push(shim);
 
