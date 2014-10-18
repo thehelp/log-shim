@@ -9,9 +9,14 @@ var logShim = require('../../../src/server/log_shim');
 
 describe('logShim', function() {
 
-  beforeEach(function() {
+  afterEach(function() {
     logShim.logger = null;
     logShim.loadLogger = logShim._defaultLoad;
+  });
+
+  it('is set up with proper defaults', function() {
+    expect(logShim).to.have.property('logger', null);
+    expect(logShim).to.have.property('loadLogger', logShim._defaultLoad);
   });
 
   it('returns an object with four keys, all functions', function() {
