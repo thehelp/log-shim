@@ -43,6 +43,7 @@ describe('winston', function() {
   it('should have logged warn', function() {
     expect(child.stdoutResult).to.match(/warn text/);
     expect(child.stdoutResult).to.match(/warn callback/);
+    expect(child.stdoutResult).not.to.match(/jshint unused/);
   });
 
   it('should have logged error', function() {
