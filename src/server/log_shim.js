@@ -82,9 +82,11 @@ shim.applyToVersion = function applyToVersion(version, fn) {
 
 shim.countAll = function countAll() {
   var count = 0;
+
   shim.getAllVersions()
     .forEach(function(version) {
-      count += version.length;
+      var list = registry[version];
+      count += list.length;
     });
 
   return count;
