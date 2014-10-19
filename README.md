@@ -120,12 +120,12 @@ Of course, this is a bit dangerous as it doesn't take into account the differenc
 ## To library writers:
 
 
-### Enable late configuration!
+#### Enable late configuration!
 
 Always include some sort of post-`require()` configuration option. Without it, you'll remove your users' ability to do more complex customization of `thehelp-log-shim`. They can't override `loadLogger()` if you never call it again after loading your library.
 
 
-### Choose unique module names
+#### Choose unique module names
 
 Because the module names you pass to `logShim(moduleName)` will be global to the process, consider using something like 'library-name'. If you have a reason to subdivide your project into a few sections: 'library-name:module-name'.
 
