@@ -13,6 +13,10 @@
     "thehelp-test": "3.2.0"
   },
 
+  "scripts": {
+    "test": "grunt"
+  },
+
   "config": {
     "blanket": {
       "data-cover-only": "src",
@@ -20,9 +24,25 @@
     }
   },
 
+  "description": "Allowing libaries to participate in logging without dictating anything about that logging system. Because logging is a process-level decision.",
+  "keywords": [
+    "logging",
+    "shim",
+    "winston",
+    "bunyan",
+    "debug",
+    "log4js",
+    "thehelp",
+    "log"
+  ],
+
   "author": "Scott Nonnenberg",
+  "license": "MIT",
+
+  "homepage": "https://github.com/thehelp/log-shim",
   "repository": {
     "type": "git",
-    "url": "git@infra:thehelp-log-shim"
-  }
+    "url": "git@github.com:thehelp/log-shim.git"
+  },
+  "bugs": "https://github.com/thehelp/log-shim/issues"
 }
