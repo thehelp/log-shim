@@ -6,7 +6,7 @@ Allowing libaries to participate in logging without dictating anything about tha
 ## Features
 
 * Libraries can be logging-agnostic, just call `verbose`, `info`, `warn` and `error` on the returned `logger` objects.
-* By default, these four logging libraries will be tried, in order:
+* By default, these four logging libraries will be tried, in this order:
   1. [`winston`](https://github.com/flatiron/winston)
   2. [`bunyan`](https://github.com/trentm/node-bunyan) (`verbose` is mapped to its `debug` level)
   3. [`debug`](https://github.com/visionmedia/debug) (no differentiation between log levels)
