@@ -5,9 +5,9 @@
 'use strict';
 
 /*
-`logShim` is an indirection layer:
+`logShim` is an indirection layer. Call it with your `moduleName` (required) and:
 
-1. If you've provided a `logger` object, it will return that.
+1. If a `logger` object is set, it will return that.
 2. Next, if `loadLogger()`, returns something, it will return that.
 3. If neither of these returns anything it will return `noopLogger`, which does nothing.
 
@@ -35,7 +35,8 @@ var shim = module.exports = function logShim(moduleName) {
 // will be passed to all `logShim` users
 shim.logger = null;
 
-// `_defaultLoad` tries to load `winston` first, then `bunyan`, then `debug`.
+// `_defaultLoad` first tries to load `winston`, then `bunyan`, then `debug`, then
+// `log4js`.
 shim._defaultLoad = function _defaultLoad(moduleName) {
   var logger = shim._loadWinston(moduleName);
   if (logger) {

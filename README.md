@@ -1,15 +1,15 @@
 # thehelp-log-shim
 
-Allowing libaries to participate in logging without dictating anything about that logging system.
+Allowing libaries to participate in logging without dictating anything about that logging system. Because logging is a process-level decision.
 
 
 ## Features
 
 * Libraries can be logging-agnostic, just call `verbose`, `info`, `warn` and `error` on the returned `logger` objects.
 * By default, these four logging libraries will be tried, in order:
-  1. [`winston`](https://github.com/flatiron/winston) (0.7.x and 0.8.x compatibility tested)
+  1. [`winston`](https://github.com/flatiron/winston)
   2. [`bunyan`](https://github.com/trentm/node-bunyan) (`verbose` is mapped to its `debug` level)
-  3. [`debug`](https://github.com/visionmedia/debug)
+  3. [`debug`](https://github.com/visionmedia/debug) (no differentiation between log levels)
   4. [`log4js`](https://github.com/nomiddlename/log4js-node) (`verbose` mapped to its `debug` level)
 * Library consumers can customize a library's logging system by overriding:
   * `logger` - to provided a custom static logger object
@@ -80,16 +80,13 @@ logShim.loadLogger = function(moduleName) {
 };
 
 var left = logShim('left');
+left.warn('warning! will be shown');
+
 var right = logShim('right');
-
-// prints to console
-left.warn('warning!');
-
-// does nothing
-right.warn('warning!');
+right.warn('warning! will NOT be shown');
 ```
 
-Since we're looking at `moduleName` in our `loadLogger()` override, the two `logShim()` calls result in different behavior. It's okay to return null or a half-constructed object - we'll fill in the rest.
+Since we're looking at `moduleName` in our `loadLogger()` override, the two `logShim()` calls result in different behavior. It's okay to return null or a half-constructed object - the rest of the levels will be filled in.
 
 
 ### Multi-install, multi-version
@@ -130,7 +127,7 @@ Always include some sort of post-`require()` configuration option. Without it, y
 
 ### Choose unique module names
 
-Because the module names you pass to `logShim(moduleName)` will be global to the process, consider using something like 'library-name', if you have a reason to subdivide your project into a few sections, 'library-name:module-name'.
+Because the module names you pass to `logShim(moduleName)` will be global to the process, consider using something like 'library-name'. If you have a reason to subdivide your project into a few sections: 'library-name:module-name'.
 
 
 
@@ -139,7 +136,7 @@ Because the module names you pass to `logShim(moduleName)` will be global to the
 
 ### Winston
 
-Because each module will be using a named logger from the default container (via `winston.loggers.get(moduleName)`), you'll need to do a little more work to set the default transports.
+Because each module will be using a named logger from the default container (via `winston.loggers.get()`), you'll need to do a little more work to set the default transports.
 
 For example, this is how you might share the console transport between default container loggers as well as the default top-level logger (direct `winston.info()` calls):
 
@@ -164,6 +161,16 @@ winston.remove(winston.transports.Console);
 winston.add(transport, null, instantiatedAlready);
 ```
 
+You can also set custom settings for a specific named logger from the default container:
+
+```
+winston.loggers.add('module-name', {
+  transports: [
+    // perhaps a console transport with a different label, or a different level?
+  ]
+})
+```
+
 ### Bunyan
 
 Out of the box, [`bunyan`](https://github.com/trentm/node-bunyan) doesn't support global configuration of specific loggers, so all `thehelp-log-shim` users will be logging to the console at the default 'info' level.
@@ -176,6 +183,7 @@ var bunyan = require('bunyan');
 var create = bunyan.createLogger;
 bunyan.createLogger = function(options) {
   options.level = 'debug';
+  // modify streams key here to customize where each log entry goes...
   return create(options);
 };
 ```
@@ -185,7 +193,11 @@ More discussion of central `bunyan` configuration: <https://github.com/trentm/no
 
 ### Debug
 
-It's key to remember that all [`debug`](https://github.com/visionmedia/debug) output is to stderr, and is only activated if the module in question is in your comma- or space-delimited `process.env.DEBUG` on process load.
+Just a few things to remember here:
+
+* all [`debug`](https://github.com/visionmedia/debug) output is to stderr
+* you enable a given module name by putting it in the DEBUG environment variable, which is a comma- or space-delimited list
+* enabled/disabled for a given module name is only activated on process load
 
 
 ### log4js
