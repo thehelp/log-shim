@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/thehelp/log-shim.svg?branch=master)](https://travis-ci.org/thehelp/log-shim)
+
 # thehelp-log-shim
 
 Allowing libaries to participate in logging without dictating anything about that logging system. Because logging is a process-level decision.
