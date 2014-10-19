@@ -176,6 +176,11 @@ bunyan.createLogger = function(options) {
 More discussion of central `bunyan` configuration: <https://github.com/trentm/node-bunyan/issues/116>
 
 
+### Debug
+
+It's key to remember that all [`debug`](https://github.com/visionmedia/debug) output is to stderr, and is only activated if the module in question is in your comma- or space-delimited `process.env.DEBUG` on process load.
+
+
 ## Detailed Documentation
 
 Detailed docs be found at this project's GitHub Pages, thanks to [`groc`](https://github.com/nevir/groc): <http://thehelp.github.io/log-shim/src/server/log_shim.html>
