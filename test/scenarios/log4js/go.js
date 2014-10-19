@@ -28,3 +28,13 @@ logger.warn('this is the warn text', function(arg1, arg2, arg3, arg4) {
 });
 
 logger.error('this is the error %s', 'interpolation');
+
+
+var custom = log4js.getLogger('custom');
+custom.setLevel('WARN');
+
+var second = logShim('custom');
+
+second.info('second info should not show up');
+
+second.error('second error should show up');

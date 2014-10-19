@@ -49,5 +49,12 @@ describe('log4js', function() {
     expect(child.stdoutResult).to.match(/error interpolation/);
   });
 
+  it('should not log out second info', function() {
+    expect(child.stdoutResult).not.to.match(/second info/);
+  });
+
+  it('should log out second error', function() {
+    expect(child.stdoutResult).to.match(/second error/);
+  });
 });
 

@@ -166,7 +166,7 @@ winston.add(transport, null, instantiatedAlready);
 
 ### Bunyan
 
-Out of the box, `bunyan` doesn't support global configuration of specific loggers, so all `thehelp-log-shim` users will be logging to the console at the default 'info' level.
+Out of the box, [`bunyan`](https://github.com/trentm/node-bunyan) doesn't support global configuration of specific loggers, so all `thehelp-log-shim` users will be logging to the console at the default 'info' level.
 
 But, via a monkey-patch of `bunyan.createLogger()` you can start centralizing. Here's an example of setting your current log level in one place for all loggers:
 
@@ -186,6 +186,16 @@ More discussion of central `bunyan` configuration: <https://github.com/trentm/no
 ### Debug
 
 It's key to remember that all [`debug`](https://github.com/visionmedia/debug) output is to stderr, and is only activated if the module in question is in your comma- or space-delimited `process.env.DEBUG` on process load.
+
+
+### log4js
+
+`log4js` is like `winston` except for one key difference - levels are on the logger, not on the transport. So the way to customize the levels for the various modules in your appplication is modify the logger objects themselves:
+
+```javascript
+var custom = log4js.getLogger('module-name');
+custom.setLevel('WARN');
+```
 
 
 ## Detailed Documentation
