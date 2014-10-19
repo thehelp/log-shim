@@ -33,7 +33,7 @@ shim.logger = null;
 
 // `_defaultLoad` tries to load `winston` first, then `bunyan`, then `debug`.
 shim._defaultLoad = function _defaultLoad(moduleName) {
-  var logger = shim._loadWinston();
+  var logger = shim._loadWinston(moduleName);
   if (logger) {
     return logger;
   }
@@ -97,8 +97,13 @@ shim.countAll = function countAll() {
 // =======
 
 // `_loadWinston` loads a logger from the `winston` node module if it is installed
-shim._loadWinston = function _loadWinston() {
-  return shim._tryRequire('winston');
+shim._loadWinston = function _loadWinston(moduleName) {
+  var winston = shim._tryRequire('winston');
+  if (!winston) {
+    return;
+  }
+
+  return winston.loggers.get(moduleName);
 };
 
 // `_loadBunyan` loads a logger from the `bunyan` node module if it is installed

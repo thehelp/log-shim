@@ -32,6 +32,10 @@ describe('winston', function() {
     util.cleanupScenario('winston', done);
   });
 
+  it('should have logged verbose via the default logger', function() {
+    expect(child.stdoutResult).to.match(/test default logger/);
+  });
+
   it('should have logged verbose', function() {
     expect(child.stdoutResult).to.match(/verbose text/);
   });
@@ -48,5 +52,13 @@ describe('winston', function() {
 
   it('should have logged error', function() {
     expect(child.stderrResult).to.match(/error interpolation/);
+  });
+
+  it('should not logged verbose via the second logger', function() {
+    expect(child.stdoutResult).not.to.match(/second verbose/);
+  });
+
+  it('should logged error via the second logger', function() {
+    expect(child.stdoutResult).not.to.match(/\[limited\] second error/);
   });
 });

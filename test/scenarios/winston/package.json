@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "thehelp-core": "2.0.3",
     "winston": "0.8.1"
   }
 }

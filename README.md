@@ -127,6 +127,36 @@ Always include some sort of post-`require()` configuration option!
 You'll remove your users' ability to do more complex customization of `thehelp-log-shim` if you load everything up on initial `require()` of your library. In that case, you'll load up your version of `thehelp-log-shim`, get your `logger` object, then move on before your users have a chance to inject themselves.
 
 
+## Some logger-specific notes:
+
+
+### Winston
+
+Because each module will be using a named logger from the default container (via `winston.loggers.get(moduleName)`), you'll need to do a little more work to set the default transports.
+
+For example, this is how you might share the console transport between default container loggers as well as the default top-level logger (direct `winston.info()` calls):
+
+```javascript
+var options = {
+  colorize: true,
+  timestamp: function() {
+    var date = new Date();
+    return date.toJSON();
+  },
+  level: 'verbose'
+};
+var transport = new winston.transports.Console(options);
+
+// configure default transports for all loggers in default container
+winston.loggers.options.transports = [transport];
+
+// configure the top level default logger
+var instantiatedAlready = true;
+winston.remove(winston.transports.Console);
+winston.add(transport, null, instantiatedAlready);
+```
+
+
 ## Detailed Documentation
 
 Detailed docs be found at this project's GitHub Pages, thanks to [`groc`](https://github.com/nevir/groc): <http://thehelp.github.io/log-shim/src/server/log_shim.html>
