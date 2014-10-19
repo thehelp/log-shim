@@ -13,11 +13,8 @@ var origVersion = pkg.version;
 describe('multi', function() {
 
   var deleteShimCache = function() {
-    var shim = path.join(__dirname, '../../../src/server/log_shim.js');
-    var index = path.join(__dirname, '../../../src/server/index.js');
-
-    delete require.cache[shim];
-    delete require.cache[index];
+    var shimPath = path.join(__dirname, '../../../src/server/index.js');
+    delete require.cache[shimPath];
   };
 
   var updateVersion = function() {

@@ -21,10 +21,10 @@ exports.setupScenario = function(name, cb) {
   var root = exports.scenarioDir(name);
   var destDir = path.join(root, 'node_modules/thehelp-log-shim');
 
-  // copy log_shim.js
-  var logShimSrc = path.join(__dirname, '../../../src/server/log_shim.js');
+  // copy index.js
+  var logShimSrc = path.join(__dirname, '../../../src/server/index.js');
   var logShimDestDir = path.join(destDir, 'src/server');
-  var logShimDest = path.join(logShimDestDir, 'log_shim.js');
+  var logShimDest = path.join(logShimDestDir, 'index.js');
 
   // copy shim_package.json
   var pkgSrc = path.join(__dirname, '../../scenarios/shim-package.json');
@@ -38,7 +38,7 @@ exports.setupScenario = function(name, cb) {
       exec('npm install', options, cb);
     },
     function(cb) {
-      // make deep directory for log_shim.js file
+      // make deep directory for index.js file
       mkdirp(logShimDestDir, cb);
     },
     function(cb) {

@@ -5,7 +5,7 @@ var test = require('thehelp-test');
 var expect = test.expect;
 var sinon = test.sinon;
 
-var logShim = require('../../../src/server/log_shim');
+var logShim = require('../../../src/server');
 
 describe('logShim', function() {
 
