@@ -137,6 +137,7 @@ Because each module will be using a named logger from the default container (via
 For example, this is how you might share the console transport between default container loggers as well as the default top-level logger (direct `winston.info()` calls):
 
 ```javascript
+var winston = require('winston');
 var options = {
   colorize: true,
   timestamp: function() {
@@ -155,6 +156,24 @@ var instantiatedAlready = true;
 winston.remove(winston.transports.Console);
 winston.add(transport, null, instantiatedAlready);
 ```
+
+### Bunyan
+
+Out of the box, `bunyan` doesn't support global configuration of specific loggers, so all `thehelp-log-shim` users will be logging to the console at the default 'info' level.
+
+But, via a monkey-patch of `bunyan.createLogger()` you can start centralizing. Here's an example of setting your current log level in one place for all loggers:
+
+```javascript
+var bunyan = require('bunyan');
+
+var create = bunyan.createLogger;
+bunyan.createLogger = function(options) {
+  options.level = 'debug';
+  return create(options);
+};
+```
+
+More discussion of central `bunyan` configuration: <https://github.com/trentm/node-bunyan/issues/116>
 
 
 ## Detailed Documentation
