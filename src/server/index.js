@@ -15,6 +15,10 @@ _Note: `shim._fix()` ensures that any object returned from this method has all t
 required functions. See `_requiredKeys` below._
 */
 var shim = module.exports = function logShim(moduleName) {
+  if (!moduleName) {
+    throw new Error('moduleName is required!');
+  }
+
   if (shim.logger) {
     return shim._fix(shim.logger);
   }

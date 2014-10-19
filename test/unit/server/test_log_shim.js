@@ -47,6 +47,12 @@ describe('logShim', function() {
     expect(logger).to.have.property('error').that.is.a('function');
   });
 
+  it('throws an error if no moduleName is provided', function() {
+    expect(function() {
+      logShim();
+    }).to['throw']().that.match(/moduleName is required!/);
+  });
+
   it('fixes provided loadLogger() function that returns empty object', function() {
     logShim.loadLogger = function() {
       return {};
