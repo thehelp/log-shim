@@ -120,11 +120,18 @@ versions.forEach(function(version) {
 Of course, this is a bit dangerous as it doesn't take into account the differences of all the various versions. But it will get you started.
 
 
-## A note to library writers
+## To library writers:
 
-Always include some sort of post-`require()` configuration option!
 
-You'll remove your users' ability to do more complex customization of `thehelp-log-shim` if you load everything up on initial `require()` of your library. In that case, you'll load up your version of `thehelp-log-shim`, get your `logger` object, then move on before your users have a chance to inject themselves.
+### Enable late configuration!
+
+Always include some sort of post-`require()` configuration option. Without it, you'll remove your users' ability to do more complex customization of `thehelp-log-shim`. They can't override `loadLogger()` if you never call it again after loading your library.
+
+
+### Choose unique module names
+
+Because the module names you pass to `logShim(moduleName)` will be global to the process, consider using something like 'library-name', if you have a reason to subdivide your project into a few sections, 'library-name:module-name'.
+
 
 
 ## Some logger-specific notes:
