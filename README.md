@@ -103,7 +103,7 @@ Time to write some code:
 var logShim = require('thehelp-log-shim');
 
 // how many are installed?
-console.log(logShim.countInstalled());
+console.log(logShim.countAll());
 
 // this is an array of string versions
 var versions = logShim.getAllVersions();
