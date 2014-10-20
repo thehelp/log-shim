@@ -1,0 +1,235 @@
+<!DOCTYPE html><html lang="en"><head><title>index</title></head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"><meta name="groc-relative-root" content=""><meta name="groc-document-path" content="index"><meta name="groc-project-path" content="README.md"><meta name="groc-github-url" content="https://github.com/thehelp/log-shim"><link rel="stylesheet" type="text/css" media="all" href="assets/style.css"><script type="text/javascript" src="assets/behavior.js"></script><body><div id="meta"><div class="file-path"><a href="https://github.com/thehelp/log-shim/blob/master/README.md">README.md</a></div></div><div id="document"><div class="segment"><div class="comments "><div class="wrapper"><p><a href="https://travis-ci.org/thehelp/log-shim"><img src="https://travis-ci.org/thehelp/log-shim.svg?branch=master" alt="Build Status" title="" /></a></p>
+
+<h1 id="thehelp-log-shim">thehelp-log-shim</h1>
+
+<p>Allowing libaries to participate in logging without dictating anything about that logging system. Because logging is a process-level decision.</p>
+
+<h2 id="features">Features</h2>
+
+<ul>
+<li>Libraries can be logging-agnostic, just call <code>verbose</code>, <code>info</code>, <code>warn</code> and <code>error</code> on the returned <code>logger</code> objects.</li>
+<li>By default, these four logging libraries will be tried, in this order:
+<ol><li><a href="https://github.com/flatiron/winston"><code>winston</code></a></li>
+<li><a href="https://github.com/trentm/node-bunyan"><code>bunyan</code></a> (<code>verbose</code> is mapped to its <code>debug</code> level)</li>
+<li><a href="https://github.com/visionmedia/debug"><code>debug</code></a> (no differentiation between log levels)</li>
+<li><a href="https://github.com/nomiddlename/log4js-node"><code>log4js</code></a> (<code>verbose</code> mapped to its <code>debug</code> level)</li></ol></li>
+<li>Library consumers can customize a library's logging system by overriding:
+<ul><li><code>logger</code> - to provided a custom static logger object</li>
+<li><code>loadLogger(moduleName)</code> - for dynamic, per-module logger generation</li></ul></li>
+<li>If a library isn't using the same version of <code>thehelp-log-shim</code> that you have installed, you can use <code>getAllVersions()</code> to get access to all versions of this package loaded in your process</li>
+</ul>
+
+<h2 id="setup">Setup</h2>
+
+<p>First install the project as a dependency:</p>
+
+<pre><code class="bash">npm install thehelp-log-shim --save
+</code></pre>
+
+<p>Then start using it:</p>
+
+<pre><code class="javascript">var logShim = require('thehelp-log-shim');
+var logger = logShim('my-module-name');
+
+logger.info('blah');
+</code></pre>
+
+<p>If no logging system is installed, that <code>logger.info()</code> call will do nothing. Install one of the four logging systems supported by default, and that call will automatically use it.</p>
+
+<h2 id="additional-configuration">Additional configuration</h2>
+
+<p>The first level of configuration is by providing your own <code>logger</code> object:</p>
+
+<pre><code class="javascript">var logShim = require('thehelp-log-shim');
+logShim.logger = {
+  error: function(item) {
+    console.error('error:', item);
+  },
+  warn: function(item) {
+    console.warn('warn:', item);
+  }
+};
+
+var logger = logShim('my-module-name');
+logger.info('info message');
+logger.warn('something is flaky!');
+</code></pre>
+
+<p>The <code>logger.info()</code> call will do nothing, and the <code>warn()</code> call will be piped through your function to <code>console.warn</code>.</p>
+
+<p><em>Note: Notice that the provided <code>logger</code> only specified two levels, but the code calls <code>info()</code>. <code>thehelp-log-shim</code> will ensure that all levels are present on any <code>logger</code> it provides.</em></p>
+
+<h3 id="dynamic-loggers">Dynamic loggers</h3>
+
+<p>Now let's get a little more advanced. You have a number of modules, and you want to do different things for each of them:</p>
+
+<pre><code class="javascript">var logShim = require('thehelp-log-shim');
+logShim.loadLogger = function(moduleName) {
+  if (moduleName === 'left')) {
+    return {
+      verbose: console.log,
+      info: console.log,
+      warn: console.log,
+      error: console.error
+    }
+  }
+};
+
+var left = logShim('left');
+left.warn('warning! will be shown');
+
+var right = logShim('right');
+right.warn('warning! will NOT be shown');
+</code></pre>
+
+<p>Since we're looking at <code>moduleName</code> in our <code>loadLogger()</code> override, the two <code>logShim()</code> calls result in different behavior. It's okay to return null or a half-constructed object - the rest of the levels will be filled in.</p>
+
+<h3 id="multi-install-multi-version">Multi-install, multi-version</h3>
+
+<p>Okay, now you're using a few different libraries, all of which use <code>thehelp-log-shim</code>. Things are easy as long as you're okay with them all jumping in on the first logging system they find.</p>
+
+<p>Things get interesting when you want to hook in for deeper behavior. <code>npm</code> is a very flexible system, so you might have multiple versions of <code>thehelp-log-shim</code> installed in the tree of modules under your <code>node_modules</code> directory.</p>
+
+<p>Time to write some code:</p>
+
+<pre><code class="javascript">var logShim = require('thehelp-log-shim');
+
+// how many are installed?
+console.log(logShim.countAll());
+
+// this is an array of string versions
+var versions = logShim.getAllVersions();
+
+// set all versions to one logger object
+versions.forEach(function(version) {
+  logShim.applyToVersion(version, function() {
+    logShim.logger = myCustomLogger;
+  });
+});
+</code></pre>
+
+<p>Of course, this is a bit dangerous as it doesn't take into account the differences of all the various versions. But it will get you started.</p>
+
+<h2 id="to-library-writers">To library writers:</h2>
+
+<h4 id="enable-late-configuration">Enable late configuration!</h4>
+
+<p>Always include some sort of post-<code>require()</code> configuration option. Without it, you'll remove your users' ability to do more complex customization of <code>thehelp-log-shim</code>. They can't override <code>loadLogger()</code> if you never call it again after loading your library.</p>
+
+<h4 id="choose-unique-module-names">Choose unique module names</h4>
+
+<p>Because the module names you pass to <code>logShim(moduleName)</code> will be global to the process, consider using something like 'library-name'. If you have a reason to subdivide your project into a few sections: 'library-name:module-name'.</p>
+
+<h2 id="some-logger-specific-notes">Some logger-specific notes:</h2>
+
+<h3 id="winston">Winston</h3>
+
+<p>Because each module will be using a named logger from the default container (via <code>winston.loggers.get()</code>), you'll need to do a little more work to set the default transports.</p>
+
+<p>For example, this is how you might share the console transport between default container loggers as well as the default top-level logger (direct <code>winston.info()</code> calls):</p>
+
+<pre><code class="javascript">var winston = require('winston');
+var options = {
+  colorize: true,
+  timestamp: function() {
+    var date = new Date();
+    return date.toJSON();
+  },
+  level: 'verbose'
+};
+var transport = new winston.transports.Console(options);
+
+// configure default transports for all loggers in default container
+winston.loggers.options.transports = [transport];
+
+// configure the top level default logger
+var instantiatedAlready = true;
+winston.remove(winston.transports.Console);
+winston.add(transport, null, instantiatedAlready);
+</code></pre>
+
+<p>You can also set custom settings for a specific named logger from the default container:</p>
+
+<pre><code>winston.loggers.add('module-name', {
+  transports: [
+    // perhaps a console transport with a different label, or a different level?
+  ]
+})
+</code></pre>
+
+<h3 id="bunyan">Bunyan</h3>
+
+<p>Out of the box, <a href="https://github.com/trentm/node-bunyan"><code>bunyan</code></a> doesn't support global configuration of specific loggers, so all <code>thehelp-log-shim</code> users will be logging to the console at the default 'info' level.</p>
+
+<p>But, via a monkey-patch of <code>bunyan.createLogger()</code> you can start centralizing. Here's an example of setting your current log level in one place for all loggers:</p>
+
+<pre><code class="javascript">var bunyan = require('bunyan');
+
+var create = bunyan.createLogger;
+bunyan.createLogger = function(options) {
+  options.level = 'debug';
+  // modify streams key here to customize where each log entry goes...
+  return create(options);
+};
+</code></pre>
+
+<p>More discussion of central <code>bunyan</code> configuration: <a href="https://github.com/trentm/node-bunyan/issues/116">https://github.com/trentm/node-bunyan/issues/116</a></p>
+
+<h3 id="debug">Debug</h3>
+
+<p>Just a few things to remember here:</p>
+
+<ul>
+<li>all <a href="https://github.com/visionmedia/debug"><code>debug</code></a> output is to stderr</li>
+<li>you enable a given module name by putting it in the DEBUG environment variable, which is a comma- or space-delimited list</li>
+<li>enabled/disabled for a given module name is only activated on process load</li>
+</ul>
+
+<h3 id="log4js">log4js</h3>
+
+<p><code>log4js</code> is like <code>winston</code> except for one key difference - levels are on the logger, not on the transport. So the way to customize the levels for the various modules in your appplication is modify the logger objects themselves:</p>
+
+<pre><code class="javascript">var custom = log4js.getLogger('module-name');
+custom.setLevel('WARN');
+</code></pre>
+
+<h2 id="detailed-documentation">Detailed Documentation</h2>
+
+<p>Detailed docs be found at this project's GitHub Pages, thanks to <a href="https://github.com/nevir/groc"><code>groc</code></a>: <a href="http://thehelp.github.io/log-shim/src/server/log_shim.html">http://thehelp.github.io/log-shim/src/server/log_shim.html</a></p>
+
+<h2 id="contributing-changes">Contributing changes</h2>
+
+<p>When you have some changes ready, please submit a pull request with:</p>
+
+<ul>
+<li>Justification - why is this change worthwhile? Link to issues, use code samples, etc.</li>
+<li>Documentation changes for your code updates. Be sure to check the groc-generated HTML with <code>grunt doc</code></li>
+<li>A description of how you tested the change. Don't forget about the very-useful <code>npm link</code> command :0)</li>
+</ul>
+
+<p>I may ask you to use a <code>git rebase</code> to ensure that your commits are not interleaved with commits already in the history. And of course, make sure <code>grunt</code> completes successfully (take a look at the requirements for <a href="https://github.com/thehelp/project"><code>thehelp-project</code></a>). :0)</p>
+
+<h2 id="license">License</h2>
+
+<p>(The MIT License)</p>
+
+<p>Copyright (c) 2014 Scott Nonnenberg &lt;scott@nonnenberg.com&gt;</p>
+
+<p>Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:</p>
+
+<p>The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.</p>
+
+<p>THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p></div></div></div></div></body></html>

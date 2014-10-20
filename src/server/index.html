@@ -1,0 +1,132 @@
+<!DOCTYPE html><html lang="en"><head><title>src/server/index</title></head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"><meta name="groc-relative-root" content="../../"><meta name="groc-document-path" content="src/server/index"><meta name="groc-project-path" content="src/server/index.js"><meta name="groc-github-url" content="https://github.com/thehelp/log-shim"><link rel="stylesheet" type="text/css" media="all" href="../../assets/style.css"><script type="text/javascript" src="../../assets/behavior.js"></script><body><div id="meta"><div class="file-path"><a href="https://github.com/thehelp/log-shim/blob/master/src/server/index.js">src/server/index.js</a></div></div><div id="document"><div class="segment"><div class="comments "><div class="wrapper"><h1 id="logshim">logShim</h1>
+
+<p>To allow libaries to participate in logging without dictating anything about that
+logging system.</p></div></div><div class="code"><div class="wrapper"><span class="s1">&#39;use strict&#39;</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p><code>logShim</code> is an indirection layer. Call it with your <code>moduleName</code> (required) and:</p>
+
+<ol>
+<li>If a <code>logger</code> object is set, it will return that.</li>
+<li>Next, if <code>loadLogger()</code>, returns something, it will return that.</li>
+<li>If neither of these returns anything it will return <code>noopLogger</code>, which does nothing.</li>
+</ol>
+
+<p><em>Note: <code>shim._fix()</code> ensures that any object returned from this method has all the
+required functions. See <code>_requiredKeys</code> below.</em></p></div></div><div class="code"><div class="wrapper"><span class="kd">var</span> <span class="nx">shim</span> <span class="o">=</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">logShim</span><span class="p">(</span><span class="nx">moduleName</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">moduleName</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s1">&#39;moduleName is required!&#39;</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="nx">shim</span><span class="p">.</span><span class="nx">logger</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">shim</span><span class="p">.</span><span class="nx">_fix</span><span class="p">(</span><span class="nx">shim</span><span class="p">.</span><span class="nx">logger</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">var</span> <span class="nx">loaded</span> <span class="o">=</span> <span class="nx">shim</span><span class="p">.</span><span class="nx">loadLogger</span><span class="p">(</span><span class="nx">moduleName</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">loaded</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">shim</span><span class="p">.</span><span class="nx">_fix</span><span class="p">(</span><span class="nx">loaded</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nx">shim</span><span class="p">.</span><span class="nx">_noopLogger</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Set <code>logger</code> to override everything else - this object (after a <code>_fix()</code> of course)
+will be passed to all <code>logShim</code> users</p></div></div><div class="code"><div class="wrapper"><span class="nx">shim</span><span class="p">.</span><span class="nx">logger</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p><code>_defaultLoad</code> first tries to load <code>winston</code>, then <code>bunyan</code>, then <code>debug</code>, then
+<code>log4js</code>.</p></div></div><div class="code"><div class="wrapper"><span class="nx">shim</span><span class="p">.</span><span class="nx">_defaultLoad</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">_defaultLoad</span><span class="p">(</span><span class="nx">moduleName</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">logger</span> <span class="o">=</span> <span class="nx">shim</span><span class="p">.</span><span class="nx">_loadWinston</span><span class="p">(</span><span class="nx">moduleName</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">logger</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">logger</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="nx">logger</span> <span class="o">=</span> <span class="nx">shim</span><span class="p">.</span><span class="nx">_loadBunyan</span><span class="p">(</span><span class="nx">moduleName</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">logger</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">logger</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="nx">logger</span> <span class="o">=</span> <span class="nx">shim</span><span class="p">.</span><span class="nx">_loadDebug</span><span class="p">(</span><span class="nx">moduleName</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">logger</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">logger</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nx">shim</span><span class="p">.</span><span class="nx">_loadLog4js</span><span class="p">(</span><span class="nx">moduleName</span><span class="p">);</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Override this to install logic to run when a <code>logShim</code> user requests their log object.</p></div></div><div class="code"><div class="wrapper"><span class="nx">shim</span><span class="p">.</span><span class="nx">loadLogger</span> <span class="o">=</span> <span class="nx">shim</span><span class="p">.</span><span class="nx">_defaultLoad</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><h1 id="multi-version-compat">Multi-version compat</h1></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>If multiple versions of this library are loaded by a hierarchy of various libraries,
+you won't be able to customize the logging for all of them - only the version you
+install directly. <code>logShim</code> registers itself on <code>global[pkg.name][pkg.version]</code>, giving
+you access to all loaded shims.</p></div></div><div class="code"><div class="wrapper"><span class="kd">var</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">pkg</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span> <span class="o">+</span> <span class="s1">&#39;/../../package.json&#39;</span><span class="p">));</span>
+
+<span class="nx">shim</span><span class="p">.</span><span class="nx">_version</span> <span class="o">=</span> <span class="nx">pkg</span><span class="p">.</span><span class="nx">version</span><span class="p">;</span>
+
+<span class="kd">var</span> <span class="nx">registry</span> <span class="o">=</span> <span class="nx">global</span><span class="p">[</span><span class="nx">pkg</span><span class="p">.</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="nx">global</span><span class="p">[</span><span class="nx">pkg</span><span class="p">.</span><span class="nx">name</span><span class="p">]</span> <span class="o">||</span> <span class="p">{};</span>
+<span class="kd">var</span> <span class="nx">version</span> <span class="o">=</span> <span class="nx">registry</span><span class="p">[</span><span class="nx">pkg</span><span class="p">.</span><span class="nx">version</span><span class="p">]</span> <span class="o">=</span> <span class="nx">registry</span><span class="p">[</span><span class="nx">pkg</span><span class="p">.</span><span class="nx">version</span><span class="p">]</span> <span class="o">||</span> <span class="p">[];</span>
+
+<span class="nx">version</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">shim</span><span class="p">);</span>
+
+<span class="nx">shim</span><span class="p">.</span><span class="nx">getAllVersions</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">getAllVersions</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">registry</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="nx">shim</span><span class="p">.</span><span class="nx">applyToVersion</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">applyToVersion</span><span class="p">(</span><span class="nx">version</span><span class="p">,</span> <span class="nx">fn</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">registry</span><span class="p">[</span><span class="nx">version</span><span class="p">].</span><span class="nx">forEach</span><span class="p">(</span><span class="nx">fn</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="nx">shim</span><span class="p">.</span><span class="nx">countAll</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">countAll</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+  <span class="nx">shim</span><span class="p">.</span><span class="nx">getAllVersions</span><span class="p">()</span>
+    <span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">version</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">list</span> <span class="o">=</span> <span class="nx">registry</span><span class="p">[</span><span class="nx">version</span><span class="p">];</span>
+      <span class="nx">count</span> <span class="o">+=</span> <span class="nx">list</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+    <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">count</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><h1 id="specific-loggers">Specific loggers</h1></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p><code>_loadWinston</code> loads a logger from the <code>winston</code> node module if it is installed</p></div></div><div class="code"><div class="wrapper"><span class="nx">shim</span><span class="p">.</span><span class="nx">_loadWinston</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">_loadWinston</span><span class="p">(</span><span class="nx">moduleName</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">winston</span> <span class="o">=</span> <span class="nx">shim</span><span class="p">.</span><span class="nx">_tryRequire</span><span class="p">(</span><span class="s1">&#39;winston&#39;</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">winston</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nx">winston</span><span class="p">.</span><span class="nx">loggers</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">moduleName</span><span class="p">);</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p><code>_loadBunyan</code> loads a logger from the <code>bunyan</code> node module if it is installed</p></div></div><div class="code"><div class="wrapper"><span class="nx">shim</span><span class="p">.</span><span class="nx">_loadBunyan</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">_loadBunyan</span><span class="p">(</span><span class="nx">moduleName</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">bunyan</span> <span class="o">=</span> <span class="nx">shim</span><span class="p">.</span><span class="nx">_tryRequire</span><span class="p">(</span><span class="s1">&#39;bunyan&#39;</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">bunyan</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kd">var</span> <span class="nx">logger</span> <span class="o">=</span> <span class="nx">bunyan</span><span class="p">.</span><span class="nx">createLogger</span><span class="p">({</span><span class="nx">name</span><span class="o">:</span> <span class="nx">moduleName</span><span class="p">});</span>
+  <span class="nx">logger</span><span class="p">.</span><span class="nx">verbose</span> <span class="o">=</span> <span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span><span class="p">;</span>
+  <span class="k">return</span> <span class="nx">logger</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p><code>_loadDebug</code> loads a logger from the <code>debug</code> node module if it is installed</p></div></div><div class="code"><div class="wrapper"><span class="nx">shim</span><span class="p">.</span><span class="nx">_loadDebug</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">_loadDebug</span><span class="p">(</span><span class="nx">moduleName</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">debug</span> <span class="o">=</span> <span class="nx">shim</span><span class="p">.</span><span class="nx">_tryRequire</span><span class="p">(</span><span class="s1">&#39;debug&#39;</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">debug</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="kd">var</span> <span class="nx">logger</span> <span class="o">=</span> <span class="nx">debug</span><span class="p">(</span><span class="nx">moduleName</span><span class="p">);</span>
+
+  <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">{};</span>
+  <span class="nx">shim</span><span class="p">.</span><span class="nx">_requiredKeys</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">result</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="nx">logger</span><span class="p">;</span>
+  <span class="p">});</span>
+  <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p><code>_loadLog4js</code> loads a logger from the <code>log4js</code> node module if it is installed</p></div></div><div class="code"><div class="wrapper"><span class="nx">shim</span><span class="p">.</span><span class="nx">_loadLog4js</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">_loadLog4js</span><span class="p">(</span><span class="nx">moduleName</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">log4js</span> <span class="o">=</span> <span class="nx">shim</span><span class="p">.</span><span class="nx">_tryRequire</span><span class="p">(</span><span class="s1">&#39;log4js&#39;</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">log4js</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kd">var</span> <span class="nx">logger</span> <span class="o">=</span> <span class="nx">log4js</span><span class="p">.</span><span class="nx">getLogger</span><span class="p">(</span><span class="nx">moduleName</span><span class="p">);</span>
+  <span class="nx">logger</span><span class="p">.</span><span class="nx">verbose</span> <span class="o">=</span> <span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="nx">logger</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><h1 id="helper-methods">Helper methods</h1></div></div></div><div class="segment"><div class="code"><div class="wrapper"><span class="kd">function</span> <span class="nx">noop</span><span class="p">()</span> <span class="p">{}</span>
+
+<span class="nx">shim</span><span class="p">.</span><span class="nx">_requiredKeys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;verbose&#39;</span><span class="p">,</span> <span class="s1">&#39;info&#39;</span><span class="p">,</span> <span class="s1">&#39;warn&#39;</span><span class="p">,</span> <span class="s1">&#39;error&#39;</span><span class="p">];</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>if <code>key</code> is a function on <code>logger</code>, we return true</p></div></div><div class="code"><div class="wrapper"><span class="nx">shim</span><span class="p">.</span><span class="nx">_check</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">_check</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span> <span class="nx">logger</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">logger</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="k">typeof</span> <span class="nx">logger</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">===</span> <span class="s1">&#39;function&#39;</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p><code>_fix</code> ensures that every logger has all the required methods.</p></div></div><div class="code"><div class="wrapper"><span class="nx">shim</span><span class="p">.</span><span class="nx">_fix</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">_fix</span><span class="p">(</span><span class="nx">logger</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">shim</span><span class="p">.</span><span class="nx">_requiredKeys</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">shim</span><span class="p">.</span><span class="nx">_check</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span> <span class="nx">logger</span><span class="p">))</span> <span class="p">{</span>
+      <span class="nx">logger</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="nx">noop</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+  <span class="k">return</span> <span class="nx">logger</span><span class="p">;</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>You get <code>_noopLogger</code> when logging packages are installed - a logger that does nothing.</p></div></div><div class="code"><div class="wrapper"><span class="nx">shim</span><span class="p">.</span><span class="nx">_noopLogger</span> <span class="o">=</span> <span class="nx">shim</span><span class="p">.</span><span class="nx">_fix</span><span class="p">(</span><span class="kd">function</span> <span class="nx">noopLogger</span><span class="p">()</span> <span class="p">{});</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p><code>_tryRequire</code> allows us to load non-dependency optional node modules</p></div></div><div class="code"><div class="wrapper"><span class="nx">shim</span><span class="p">.</span><span class="nx">_tryRequire</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">_tryRequire</span><span class="p">(</span><span class="nx">module</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">try</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">require</span><span class="p">(</span><span class="nx">module</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="k">catch</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{}</span>
+<span class="p">};</span></div></div></div></div></body></html>
