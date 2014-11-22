@@ -214,7 +214,7 @@ custom.setLevel('WARN');
 
 ## Detailed Documentation
 
-Detailed docs be found at this project's GitHub Pages, thanks to [`groc`](https://github.com/nevir/groc): <http://thehelp.github.io/log-shim/src/server/log_shim.html>
+Detailed docs be found at this project's GitHub Pages, thanks to [`groc`](https://github.com/nevir/groc): <http://thehelp.github.io/log-shim/src/server/index.html>
 
 
 ## Contributing changes
