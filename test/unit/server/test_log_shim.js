@@ -69,6 +69,10 @@ describe('logShim', function() {
   describe('multi-version support', function() {
     var pkg = require('../../../package.json');
 
+    after(function() {
+      global[pkg.name][pkg.version] = [logShim];
+    });
+
     it('single version installed', function() {
       expect(global[pkg.name][pkg.version]).to.have.length(1);
       expect(logShim.countAll()).to.equal(1);
