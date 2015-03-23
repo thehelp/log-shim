@@ -5,7 +5,6 @@
 
   "devDependencies": {
     "async": "0.9.0",
-    "blanket": "1.1.6",
     "grunt": "0.4.5",
     "mkdirp": "0.5.0",
     "rimraf": "2.2.8",
@@ -15,13 +14,6 @@
 
   "scripts": {
     "test": "grunt"
-  },
-
-  "config": {
-    "blanket": {
-      "data-cover-only": "src",
-      "data-cover-never": "['lib/','node_modules/','test/','src/client']"
-    }
   },
 
   "description": "Allowing libaries to participate in logging without dictating anything about that logging system. Because logging is a process-level decision.",
