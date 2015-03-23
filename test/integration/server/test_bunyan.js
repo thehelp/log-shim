@@ -12,7 +12,7 @@ describe('bunyan', function() {
   var child;
 
   before(function(done) {
-    this.timeout(10000);
+    this.timeout(30000);
 
     util.setupScenario('bunyan', function(err) {
       if (err) {
