@@ -4,6 +4,8 @@ test
 misc
 tmp
 logs
+coverage
+docs
 
 public
 
