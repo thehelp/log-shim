@@ -21,6 +21,9 @@ exports.setupScenario = function(name, cb) {
   var root = exports.scenarioDir(name);
   var destDir = path.join(root, 'node_modules/thehelp-log-shim');
 
+  // delete npm3-installed winston
+  var winstonDir = path.join(__dirname, '../../../node_modules/winston');
+
   // copy index.js
   var logShimSrc = path.join(__dirname, '../../../src/server/index.js');
   var logShimDestDir = path.join(destDir, 'src/server');
@@ -31,6 +34,9 @@ exports.setupScenario = function(name, cb) {
   var pkgDest = path.join(destDir, 'package.json');
 
   async.series([
+    function(cb) {
+      rmrf(winstonDir, cb);
+    },
     function(cb) {
       var options = {
         cwd: root
