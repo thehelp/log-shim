@@ -48,12 +48,12 @@ shim._defaultLoad = function _defaultLoad(moduleName) {
     return logger;
   }
 
-  logger = shim._loadDebug(moduleName);
+  logger = shim._loadLog4js(moduleName);
   if (logger) {
     return logger;
   }
 
-  return shim._loadLog4js(moduleName);
+  return shim._loadDebug(moduleName);
 };
 
 // Override this to install logic to run when a `logShim` user requests their log object.
@@ -123,6 +123,19 @@ shim._loadBunyan = function _loadBunyan(moduleName) {
   return logger;
 };
 
+// `_loadLog4js` loads a logger from the `log4js` node module if it is installed
+shim._loadLog4js = function _loadLog4js(moduleName) {
+  var log4js = shim._tryRequire('log4js');
+  if (!log4js) {
+    return;
+  }
+
+  var logger = log4js.getLogger(moduleName);
+  logger.verbose = logger.debug;
+
+  return logger;
+};
+
 // `_loadDebug` loads a logger from the `debug` node module if it is installed
 shim._loadDebug = function _loadDebug(moduleName) {
   var debug = shim._tryRequire('debug');
@@ -136,19 +149,6 @@ shim._loadDebug = function _loadDebug(moduleName) {
     result[key] = logger;
   });
   return result;
-};
-
-// `_loadLog4js` loads a logger from the `log4js` node module if it is installed
-shim._loadLog4js = function _loadLog4js(moduleName) {
-  var log4js = shim._tryRequire('log4js');
-  if (!log4js) {
-    return;
-  }
-
-  var logger = log4js.getLogger(moduleName);
-  logger.verbose = logger.debug;
-
-  return logger;
 };
 
 // Helper methods
