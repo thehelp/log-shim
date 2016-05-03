@@ -12,7 +12,7 @@ Allowing libaries to participate in logging without dictating anything about tha
   1. [`bunyan`](https://github.com/trentm/node-bunyan) - `verbose` is mapped to its `debug` level.
   2. [`log4js`](https://github.com/nomiddlename/log4js-node) - `verbose` mapped to its `debug` level.
   3. [`winston`](https://github.com/flatiron/winston) (_Note: Added second-to-last because it is installed by `prompt`, [now at the top level because of npm@3](https://github.com/npm/npm/blob/master/CHANGELOG.md#flat-flat-flat))_
-  4. [`debug`](https://github.com/visionmedia/debug) - no differentiation between log levels. (_Note: Added last because it is likely already installed in your project already thanks to `mocha`.
+  4. [`debug`](https://github.com/visionmedia/debug) - no differentiation between log levels. (_Note: Added last because it is likely already installed in your project already thanks to `mocha`._)
 * Library consumers can customize a library's logging system by overriding:
   * `logger` - to provided a custom static logger object
   * `loadLogger(moduleName)` - for dynamic, per-module logger generation
