@@ -1,3 +1,8 @@
+## 1.0.2 (2016-05-03)
+
+* `winston` now tried second-to-last because `prompt` installs it, so it may be in your `node_modules` directory even if you aren't using it directly. This is due to the new flat directory structure new in `npm@3`.
+* `debug` now tried last because `mocha` installs it. And `mocha` is extremely common.
+
 ## 1.0.1 (2014-10-19)
 
 * Fix package.json reference to entrypoint file
