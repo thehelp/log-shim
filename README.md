@@ -2,7 +2,7 @@
 
 # thehelp-log-shim
 
-Allowing libaries to participate in logging without dictating anything about that logging system. Because logging is a process-level decision.
+Allowing libaries to participate in logging without dictating anything about that logging system. Because logging is a process-level decision. [More information about `thehelp`.](https://blog.scottnonnenberg.com/the-state-of-thehelp/)
 
 
 ## Features
