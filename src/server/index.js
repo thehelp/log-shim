@@ -35,13 +35,10 @@ var shim = module.exports = function logShim(moduleName) {
 // will be passed to all `logShim` users
 shim.logger = null;
 
-// `_defaultLoad` first tries to load `winston`, then `bunyan`, then `debug`, then
-// `log4js`.
+// `_defaultLoad` first tries to load `bunyan`, then `log4js`, then `winston`, then
+// finally `debug`.
 shim._defaultLoad = function _defaultLoad(moduleName) {
-  var logger = shim._loadWinston(moduleName);
-  if (logger) {
-    return logger;
-  }
+  var logger;
 
   logger = shim._loadBunyan(moduleName);
   if (logger) {
@@ -49,6 +46,11 @@ shim._defaultLoad = function _defaultLoad(moduleName) {
   }
 
   logger = shim._loadLog4js(moduleName);
+  if (logger) {
+    return logger;
+  }
+
+  logger = shim._loadWinston(moduleName);
   if (logger) {
     return logger;
   }
